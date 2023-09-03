@@ -4,11 +4,9 @@ import loc from '../../support/locators'
 import '../../support/commandsContas'
 
 describe('Should test at a functional level', () => {
-    before(() => {
-        cy.loginFast('a@a', 'a')
-    })
-
+    
     beforeEach(() => {
+        cy.loginFast('a@a', 'a')
         cy.resetRest()
         cy.get(loc.MENU.HOME).click()
     })
