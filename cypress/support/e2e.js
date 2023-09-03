@@ -1,5 +1,5 @@
 // ***********************************************************
-// This example support/index.js is processed and
+// This example support/e2e.js is processed and
 // loaded automatically before your test files.
 //
 // This is a great place to put global configuration and
@@ -16,12 +16,5 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 
-require('cypress-xpath')
-
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
-
-
-Cypress.SelectorPlayground.defaults({
-    selectorPriority: ['data-wc', 'data-cy', 'data-test', 'data-testid', 'id', 'class', 'attributes', 'tag', 'nth-child']
-})
