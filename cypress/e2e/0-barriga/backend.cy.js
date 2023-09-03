@@ -48,20 +48,20 @@ describe('Should test at a functional level', () => {
         cy.get('@response').its('status').should('be.equal', 200)
     })
 
-    it.only('Alterar uma conta', () => {
+    it('Alterar uma conta', () => {
         cy.request({
             method: 'GET',
             url: '/contas',
-            headers: { Authorization: `JWT ${token}` },
+            //headers: { Authorization: `JWT ${token}` },
             qs: {
-                nome: 'conta para alterar'
+                nome: 'Conta para alterar'
             }
 
         }).then(res => {
             cy.request({
                 url: `https://barrigarest.wcaquino.me/contas/${res.body[0].id}`,
                 method: 'PUT',
-                headers: { Authorization: `JWT ${token}` },
+                //headers: { Authorization: `JWT ${token}` },
                 body: {
                     nome: 'conta alterada via rest'
                 }
