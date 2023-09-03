@@ -1,5 +1,7 @@
 /// <reference types="cypress" />
 
+import dayjs from "dayjs"
+
 describe('Should test at a functional level', () => {
     // let token
 
@@ -99,8 +101,8 @@ describe('Should test at a functional level', () => {
                     // headers: { Authorization: `JWT ${token}` },
                     body: {
                         conta_id: contaId,
-                        data_pagamento: Cypress.moment().add({ days: 1 }).format('DD/MM/YYYY'),
-                        data_transacao: Cypress.moment().format('DD/MM/YYYY'),
+                        data_pagamento: dayjs().add(1, 'day').format('DD/MM/YYYY'),
+                        data_transacao: dayjs().format('DD/MM/YYYY'),
                         descricao: "desc",
                         envolvido: "inter",
                         status: true,
@@ -139,8 +141,8 @@ describe('Should test at a functional level', () => {
                 // headers: { Authorization: `JWT ${token}` },
                 body: {
                     status: true,
-                    data_transacao: Cypress.moment(res.body[0].data_transacao).format('DD/MM/YYYY'),
-                    data_pagamento: Cypress.moment(res.body[0].data_pagamento).format('DD/MM/YYYY'),
+                    data_transacao: dayjs(res.body[0].data_transacao).format('DD/MM/YYYY'),
+                    data_pagamento: dayjs(res.body[0].data_pagamento).format('DD/MM/YYYY'),
                     descricao: res.body[0].descricao,
                     envolvido: res.body[0].envolvido,
                     valor: res.body[0].valor,
