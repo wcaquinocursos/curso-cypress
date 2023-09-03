@@ -8,14 +8,10 @@ describe('Should test at a functional level', () => {
     after(() => {
         cy.clearLocalStorage()
     })
-
-    before(() => {
-        buildEnv()
-        cy.login('a@a', 'senha errada')
-    })
-
+    
     beforeEach(() => {
         buildEnv()
+        cy.login('a@a', 'senha errada')
         cy.get(loc.MENU.HOME).click()
         // cy.resetApp()
     })
@@ -35,34 +31,34 @@ describe('Should test at a functional level', () => {
     })
 
     it('Should create an account', () => {
-        cy.route({
+        cy.intercept({
             method: 'POST',
-            url: '/contas',
-            response: { id: 3, nome: 'Conta de teste', visivel: true, usuario_id: 1 }
-        }).as('saveConta')
+            url: '/contas'},
+            { id: 3, nome: 'Conta de teste', visivel: true, usuario_id: 1 }
+        ).as('saveConta')
 
         cy.acessarMenuConta()
 
-        cy.route({
+        cy.intercept({
             method: 'GET',
-            url: '/contas',
-            response: [
+            url: '/contas'},
+            [
                 { id: 1, nome: 'Carteira', visivel: true, usuario_id: 1 },
                 { id: 2, nome: 'Banco', visivel: true, usuario_id: 1 },
                 { id: 3, nome: 'Conta de teste', visivel: true, usuario_id: 1 },
             ]
-        }).as('contasSave')
+        ).as('contasSave')
 
         cy.inserirConta('Conta de teste')
         cy.get(loc.MESSAGE).should('contain', 'Conta inserida com sucesso')
     })
 
     it('Should update an account', () => {
-        cy.route({
+        cy.intercept({
             method: 'PUT',
-            url: '/contas/**',
-            response: { id: 1, nome: 'Conta alterada', visivel: true, usuario_id: 1 }
-        })
+            url: '/contas/**'},
+            { id: 1, nome: 'Conta alterada', visivel: true, usuario_id: 1 }
+        )
 
         // cy.get(':nth-child(7) > :nth-child(2) > .fa-edit')
         cy.acessarMenuConta()
@@ -76,12 +72,12 @@ describe('Should test at a functional level', () => {
     })
 
     it('Should not create an account with same name', () => {
-        cy.route({
+        cy.intercept({
             method: 'POST',
-            url: '/contas',
-            response: { "error": "Já existe uma conta com esse nome!" },
-            status: 400
-        }).as('saveContaMesmoNome')
+            url: '/contas'
+        }, { 
+            statusCode: 400,
+            body: {"error": "Já existe uma conta com esse nome!" }}).as('saveContaMesmoNome')
 
         cy.acessarMenuConta()
 
@@ -91,17 +87,17 @@ describe('Should test at a functional level', () => {
     })
 
     it('Should create a transaction', () => {
-        cy.route({
+        cy.intercept({
             method: 'POST',
-            url: '/transacoes',
-            response: { "id": 31433, "descricao": "asdasd", "envolvido": "sdfsdfs", "observacao": null, "tipo": "DESP", "data_transacao": "2019-11-13T03:00:00.000Z", "data_pagamento": "2019-11-13T03:00:00.000Z", "valor": "232.00", "status": false, "conta_id": 42069, "usuario_id": 1, "transferencia_id": null, "parcelamento_id": null }
-        })
+            url: '/transacoes'},
+            { "id": 31433, "descricao": "asdasd", "envolvido": "sdfsdfs", "observacao": null, "tipo": "DESP", "data_transacao": "2019-11-13T03:00:00.000Z", "data_pagamento": "2019-11-13T03:00:00.000Z", "valor": "232.00", "status": false, "conta_id": 42069, "usuario_id": 1, "transferencia_id": null, "parcelamento_id": null }
+        )
 
-        cy.route({
+        cy.intercept({
             method: 'GET',
-            url: '/extrato/**',
-            response: 'fixture:movimentacaoSalva'
-        })
+            url: '/extrato/**'},
+            {fixture: 'movimentacaoSalva.json'}
+        )
 
         cy.get(loc.MENU.MOVIMENTACAO).click();
 
@@ -118,10 +114,10 @@ describe('Should test at a functional level', () => {
     })
 
     it('Should get balance', () => {
-        cy.route({
+        cy.intercept({
             method: 'GET',
-            url: '/transacoes/**',
-            response: {
+            url: '/transacoes/**'},
+            {
                 "conta": "Conta para saldo",
                 "id": 31436,
                 "descricao": "Movimentacao 1, calculo saldo",
@@ -137,12 +133,12 @@ describe('Should test at a functional level', () => {
                 "transferencia_id": null,
                 "parcelamento_id": null
             }
-        })
+        )
 
-        cy.route({
+        cy.intercept({
             method: 'PUT',
-            url: '/transacoes/**',
-            response: {
+            url: '/transacoes/**'},
+            {
                 "conta": "Conta para saldo",
                 "id": 31436,
                 "descricao": "Movimentacao 1, calculo saldo",
@@ -158,7 +154,7 @@ describe('Should test at a functional level', () => {
                 "transferencia_id": null,
                 "parcelamento_id": null
             }
-        })
+        )
 
         cy.get(loc.MENU.HOME).click()
         cy.xpath(loc.SALDO.FN_XP_SALDO_CONTA('Carteira')).should('contain', '100,00')
@@ -171,10 +167,10 @@ describe('Should test at a functional level', () => {
         cy.get(loc.MOVIMENTACAO.BTN_SALVAR).click()
         cy.get(loc.MESSAGE).should('contain', 'sucesso')
 
-        cy.route({
+        cy.intercept({
             method: 'GET',
-            url: '/saldo',
-            response: [{
+            url: '/saldo'},
+            [{
                 conta_id: 999,
                 conta: "Carteira",
                 saldo: "4034.00"
@@ -185,72 +181,66 @@ describe('Should test at a functional level', () => {
                 saldo: "10000000.00"
             },
             ]
-        }).as('saldoFinal')
+        ).as('saldoFinal')
 
         cy.get(loc.MENU.HOME).click()
         cy.xpath(loc.SALDO.FN_XP_SALDO_CONTA('Carteira')).should('contain', '4.034,00')
     })
 
     it('Should remove a transaction', () => {
-        cy.route({
+        cy.intercept({
             method: 'DELETE',
-            url: '/transacoes/**',
-            response: {},
-            status: 204
-        }).as('del')
+            url: '/transacoes/**'
+        }, {statusCode: 204}).as('del')
 
         cy.get(loc.MENU.EXTRATO).click()
         cy.xpath(loc.EXTRATO.FN_XP_REMOVER_ELEMENTO('Movimentacao para exclusao')).click()
         cy.get(loc.MESSAGE).should('contain', 'sucesso')
     })
 
-    it.skip('Should validate data send to create an account', () => {
+    it('Should validate data send to create an account', () => {
         const reqStub = cy.stub()
-        cy.route({
+        cy.intercept({
             method: 'POST',
-            url: '/contas',
-            response: { id: 3, nome: 'Conta de teste', visivel: true, usuario_id: 1 },
-            // onRequest: req => {
-            //     console.log(req)
-            //     expect(req.request.body.nome).to.be.empty
-            //     expect(req.request.headers).to.have.property('Authorization')
-            // }
-            onRequest: reqStub
-        }).as('saveConta')
+            url: '/contas'},
+            (req) => {
+                console.log(req.headers)
+                expect(req.body.nome).to.be.empty
+                expect(req.headers).to.have.property('authorization')
+
+                req.reply({id: 3, nome: 'Conta de teste', visivel: true, usuario_id: 1 })
+            }
+        ).as('saveConta')
 
         cy.acessarMenuConta()
 
-        cy.route({
+        cy.intercept({
             method: 'GET',
-            url: '/contas',
-            response: [
+            url: '/contas'},
+            [
                 { id: 1, nome: 'Carteira', visivel: true, usuario_id: 1 },
                 { id: 2, nome: 'Banco', visivel: true, usuario_id: 1 },
                 { id: 3, nome: 'Conta de teste', visivel: true, usuario_id: 1 },
             ]
-        }).as('contasSave')
+        ).as('contasSave')
 
         cy.inserirConta('{CONTROL}')
-        // cy.wait('@saveConta').its('request.body.nome').should('not.be.empty')
-        cy.wait('@saveConta').then(() => {
-            console.log(reqStub.args[0][0])
-            expect(reqStub.args[0][0].request.body.nome).to.be.empty
-            expect(reqStub.args[0][0].request.headers).to.have.property('Authorization')
-        })
+        //cy.wait('@saveConta').its('request.body.nome').should('not.be.empty')
+        
         cy.get(loc.MESSAGE).should('contain', 'Conta inserida com sucesso')
     })
 
     it('Should test colors', () => {
-        cy.route({
+        cy.intercept({
             method: 'GET',
-            url: '/extrato/**',
-            response: [
+            url: '/extrato/**'},
+            [
                 { "conta": "Conta para movimentacoes", "id": 31434, "descricao": "Receita paga", "envolvido": "AAA", "observacao": null, "tipo": "REC", "data_transacao": "2019-11-13T03:00:00.000Z", "data_pagamento": "2019-11-13T03:00:00.000Z", "valor": "-1500.00", "status": true, "conta_id": 42077, "usuario_id": 1, "transferencia_id": null, "parcelamento_id": null },
                 { "conta": "Conta com movimentacao", "id": 31435, "descricao": "Receita pendente", "envolvido": "BBB", "observacao": null, "tipo": "REC", "data_transacao": "2019-11-13T03:00:00.000Z", "data_pagamento": "2019-11-13T03:00:00.000Z", "valor": "-1500.00", "status": false, "conta_id": 42078, "usuario_id": 1, "transferencia_id": null, "parcelamento_id": null },
                 { "conta": "Conta para saldo", "id": 31436, "descricao": "Despesa paga", "envolvido": "CCC", "observacao": null, "tipo": "DESP", "data_transacao": "2019-11-13T03:00:00.000Z", "data_pagamento": "2019-11-13T03:00:00.000Z", "valor": "3500.00", "status": true, "conta_id": 42079, "usuario_id": 1, "transferencia_id": null, "parcelamento_id": null },
                 { "conta": "Conta para saldo", "id": 31437, "descricao": "Despesa pendente", "envolvido": "DDD", "observacao": null, "tipo": "DESP", "data_transacao": "2019-11-13T03:00:00.000Z", "data_pagamento": "2019-11-13T03:00:00.000Z", "valor": "-1000.00", "status": false, "conta_id": 42079, "usuario_id": 1, "transferencia_id": null, "parcelamento_id": null }
             ]
-        })
+        )
 
         cy.get(loc.MENU.EXTRATO).click()
         cy.xpath(loc.EXTRATO.FN_XP_LINHA('Receita paga')).should('have.class', 'receitaPaga')
