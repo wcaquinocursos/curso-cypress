@@ -13,7 +13,6 @@ describe('Should test at a functional level', () => {
         buildEnv()
         cy.login('a@a', 'senha errada')
         cy.get(loc.MENU.HOME).click()
-        // cy.resetApp()
     })
 
     it('should test the responsiveness', () => {
@@ -32,16 +31,18 @@ describe('Should test at a functional level', () => {
 
     it('Should create an account', () => {
         cy.intercept({
-            method: 'POST',
-            url: '/contas'},
+                method: 'POST',
+                url: '/contas'
+            }, 
             { id: 3, nome: 'Conta de teste', visivel: true, usuario_id: 1 }
         ).as('saveConta')
 
         cy.acessarMenuConta()
 
         cy.intercept({
-            method: 'GET',
-            url: '/contas'},
+                method: 'GET',
+                url: '/contas'
+            },
             [
                 { id: 1, nome: 'Carteira', visivel: true, usuario_id: 1 },
                 { id: 2, nome: 'Banco', visivel: true, usuario_id: 1 },
@@ -55,8 +56,9 @@ describe('Should test at a functional level', () => {
 
     it('Should update an account', () => {
         cy.intercept({
-            method: 'PUT',
-            url: '/contas/**'},
+                method: 'PUT',
+                url: '/contas/**'
+            },
             { id: 1, nome: 'Conta alterada', visivel: true, usuario_id: 1 }
         )
 
@@ -77,7 +79,8 @@ describe('Should test at a functional level', () => {
             url: '/contas'
         }, { 
             statusCode: 400,
-            body: {"error": "Já existe uma conta com esse nome!" }}).as('saveContaMesmoNome')
+            body: {"error": "Já existe uma conta com esse nome!" }
+        }).as('saveContaMesmoNome')
 
         cy.acessarMenuConta()
 
@@ -88,14 +91,30 @@ describe('Should test at a functional level', () => {
 
     it('Should create a transaction', () => {
         cy.intercept({
-            method: 'POST',
-            url: '/transacoes'},
-            { "id": 31433, "descricao": "asdasd", "envolvido": "sdfsdfs", "observacao": null, "tipo": "DESP", "data_transacao": "2019-11-13T03:00:00.000Z", "data_pagamento": "2019-11-13T03:00:00.000Z", "valor": "232.00", "status": false, "conta_id": 42069, "usuario_id": 1, "transferencia_id": null, "parcelamento_id": null }
+                method: 'POST',
+                url: '/transacoes'
+            },
+            { 
+                "id": 31433, 
+                "descricao": "asdasd", 
+                "envolvido": "sdfsdfs", 
+                "observacao": null, 
+                "tipo": "DESP", 
+                "data_transacao": "2019-11-13T03:00:00.000Z", 
+                "data_pagamento": "2019-11-13T03:00:00.000Z", 
+                "valor": "232.00", 
+                "status": false, 
+                "conta_id": 42069, 
+                "usuario_id": 1, 
+                "transferencia_id": null, 
+                "parcelamento_id": null 
+            }
         )
 
         cy.intercept({
-            method: 'GET',
-            url: '/extrato/**'},
+                method: 'GET',
+                url: '/extrato/**'
+            },
             {fixture: 'movimentacaoSalva.json'}
         )
 
@@ -115,8 +134,9 @@ describe('Should test at a functional level', () => {
 
     it('Should get balance', () => {
         cy.intercept({
-            method: 'GET',
-            url: '/transacoes/**'},
+                method: 'GET',
+                url: '/transacoes/**'
+            },
             {
                 "conta": "Conta para saldo",
                 "id": 31436,
@@ -136,8 +156,9 @@ describe('Should test at a functional level', () => {
         )
 
         cy.intercept({
-            method: 'PUT',
-            url: '/transacoes/**'},
+                method: 'PUT',
+                url: '/transacoes/**'
+            },
             {
                 "conta": "Conta para saldo",
                 "id": 31436,
@@ -168,8 +189,9 @@ describe('Should test at a functional level', () => {
         cy.get(loc.MESSAGE).should('contain', 'sucesso')
 
         cy.intercept({
-            method: 'GET',
-            url: '/saldo'},
+                method: 'GET',
+                url: '/saldo'
+            },
             [{
                 conta_id: 999,
                 conta: "Carteira",
@@ -189,9 +211,11 @@ describe('Should test at a functional level', () => {
 
     it('Should remove a transaction', () => {
         cy.intercept({
-            method: 'DELETE',
-            url: '/transacoes/**'
-        }, {statusCode: 204}).as('del')
+                method: 'DELETE',
+                url: '/transacoes/**'
+            }, 
+            {statusCode: 204}
+        ).as('del')
 
         cy.get(loc.MENU.EXTRATO).click()
         cy.xpath(loc.EXTRATO.FN_XP_REMOVER_ELEMENTO('Movimentacao para exclusao')).click()
@@ -201,8 +225,9 @@ describe('Should test at a functional level', () => {
     it('Should validate data send to create an account', () => {
         const reqStub = cy.stub()
         cy.intercept({
-            method: 'POST',
-            url: '/contas'},
+                method: 'POST',
+                url: '/contas'
+            },
             (req) => {
                 console.log(req.headers)
                 expect(req.body.nome).to.be.empty
@@ -215,8 +240,9 @@ describe('Should test at a functional level', () => {
         cy.acessarMenuConta()
 
         cy.intercept({
-            method: 'GET',
-            url: '/contas'},
+                method: 'GET',
+                url: '/contas'
+            },
             [
                 { id: 1, nome: 'Carteira', visivel: true, usuario_id: 1 },
                 { id: 2, nome: 'Banco', visivel: true, usuario_id: 1 },
@@ -232,8 +258,9 @@ describe('Should test at a functional level', () => {
 
     it('Should test colors', () => {
         cy.intercept({
-            method: 'GET',
-            url: '/extrato/**'},
+                method: 'GET',
+                url: '/extrato/**'
+            },
             [
                 { "conta": "Conta para movimentacoes", "id": 31434, "descricao": "Receita paga", "envolvido": "AAA", "observacao": null, "tipo": "REC", "data_transacao": "2019-11-13T03:00:00.000Z", "data_pagamento": "2019-11-13T03:00:00.000Z", "valor": "-1500.00", "status": true, "conta_id": 42077, "usuario_id": 1, "transferencia_id": null, "parcelamento_id": null },
                 { "conta": "Conta com movimentacao", "id": 31435, "descricao": "Receita pendente", "envolvido": "BBB", "observacao": null, "tipo": "REC", "data_transacao": "2019-11-13T03:00:00.000Z", "data_pagamento": "2019-11-13T03:00:00.000Z", "valor": "-1500.00", "status": false, "conta_id": 42078, "usuario_id": 1, "transferencia_id": null, "parcelamento_id": null },
@@ -248,7 +275,4 @@ describe('Should test at a functional level', () => {
         cy.xpath(loc.EXTRATO.FN_XP_LINHA('Despesa paga')).should('have.class', 'despesaPaga')
         cy.xpath(loc.EXTRATO.FN_XP_LINHA('Despesa pendente')).should('have.class', 'despesaPendente')
     })
-
-
 })
-
